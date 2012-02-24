@@ -1,0 +1,17 @@
+{LazyBucket} = require \../lib/lazybucket
+
+dropsize = 1     # operations are 1 drop unit
+bucketsize = 10  # maximum burst of 10 drop units
+leakrate = 1/100 # maximum sustained rate of 10 drop units per second
+
+bucket = new LazyBucket bucketsize, leakrate
+
+dosomething = !->
+  if bucket.drop dropsize
+    console.log \ok!
+    process.nextTick dosomething
+  else
+    console.log \wait!
+    setTimeout dosomething, 90
+dosomething ()
+

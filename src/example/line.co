@@ -1,0 +1,27 @@
+{EventEmitter} = require \events
+{LazyBucket} = require \../lib/lazybucket
+
+# an EventEmitter for incoming lines
+class Grating extends EventEmitter
+  !(@stream)->
+    @buf = ""
+    @stream.on \data @~data
+  data: !(data)->
+    @buf += data
+    pcs = @buf.split \\n
+    if pcs.length is 2
+      @emit \line pcs.0
+      @buf = pcs.1
+
+dropsize = 1     # operations are 1 drop unit
+bucketsize = 10  # maximum burst of 10 drop units
+leakrate = 1/500 # maximum sustained rate of 2 drop units per second
+
+grating = new Grating process.openStdin ()
+bucket = new LazyBucket bucketsize, leakrate
+
+grating.on \line !->
+  if bucket.drop dropsize
+    console.log \ok!
+  else
+    console.log \wait!

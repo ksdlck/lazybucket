@@ -1,0 +1,14 @@
+class exports.LazyBucket
+  !(@size, @rate)->
+    @time = Date.now ()
+    @level = 0
+  drop: (drop)->
+    now = Date.now ()
+    @level -= @rate * (now - @time)
+    @time = now
+    if @level < 0 then @level = 0
+    @level += drop
+    if @level > @size
+      @level -= drop
+      return false
+    return true
